@@ -1,0 +1,51 @@
+{
+  "task.pick_lift": {
+    "id": "task.pick_lift", "level": "task", "version": 1,
+    "description": "Observe, acquire and visually verify a short lift.",
+    "parameters": {"candidate": 0, "height_m": 0.06},
+    "steps": [
+      {"op": "call", "skill": "pick.acquire", "args": {"candidate": "$candidate"}},
+      {"op": "call", "skill": "pick.raise", "args": {"height_m": "$height_m"}}
+    ],
+    "checks": [{"type": "lift_observed"}]
+  },
+  "pick.acquire": {
+    "id": "pick.acquire", "level": "skill", "version": 1,
+    "description": "Acquire a fresh contact proposal, approach, then close.",
+    "parameters": {"candidate": 0},
+    "steps": [
+      {"op": "call", "skill": "grasp.prepare", "args": {"candidate": "$candidate"}},
+      {"op": "call", "skill": "grasp.approach"},
+      {"op": "call", "skill": "grasp.close"}
+    ],
+    "checks": [{"type": "grasp_anchored"}]
+  },
+  "grasp.prepare": {
+    "id": "grasp.prepare", "level": "subskill", "version": 1,
+    "description": "Fresh RGB-D observation and contact-guided pose search.",
+    "parameters": {"candidate": 0},
+    "steps": [{"op": "plan_grasp", "candidate": "$candidate"}],
+    "checks": [{"type": "object_visible"}, {"type": "grasp_planned"}]
+  },
+  "grasp.approach": {
+    "id": "grasp.approach", "level": "subskill", "version": 1,
+    "description": "Open the empty hand, move to pregrasp, then contact pose.",
+    "parameters": {}, "requires": ["planned_grasp", "empty_hand"],
+    "steps": [{"op": "open_hand"}, {"op": "move_pregrasp"}, {"op": "move_grasp"}],
+    "checks": [{"type": "tcp_at_grasp", "position_tolerance_m": 0.01, "rotation_tolerance_rad": 0.08}]
+  },
+  "grasp.close": {
+    "id": "grasp.close", "level": "subskill", "version": 1,
+    "description": "Close with joint feedback and record the camera/TCP anchor.",
+    "parameters": {}, "requires": ["planned_grasp", "tcp_at_grasp"],
+    "steps": [{"op": "close_grasp"}],
+    "checks": [{"type": "grasp_anchored"}]
+  },
+  "pick.raise": {
+    "id": "pick.raise", "level": "subskill", "version": 1,
+    "description": "Lift once, then observe object motion relative to TCP.",
+    "parameters": {"height_m": 0.06}, "requires": ["grasp_anchor"],
+    "steps": [{"op": "lift", "height_m": "$height_m"}, {"op": "verify_lift"}],
+    "checks": [{"type": "lift_observed"}]
+  }
+}

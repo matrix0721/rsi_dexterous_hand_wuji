@@ -1,0 +1,9 @@
+{
+  "name": "pick_lift",
+  "prompt": "抓取相机 ROI 中的单个目标，抬升并重新观测。",
+  "steps": [
+    {"op": "grasp"},
+    {"op": "lift", "height_m": 0.06},
+    {"op": "verify_lift"}
+  ]
+}

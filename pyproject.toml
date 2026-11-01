@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "v1-wuji"
+version = "1.1.0"
+description = "RGB-D guided UR5e and Wuji hand experiments with contact-guided pose search"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {file = "LICENSE"}
+dependencies = ["numpy>=1.24,<3", "scipy>=1.10,<2"]
+
+[project.optional-dependencies]
+robot = ["ur-rtde>=1.6,<2", "wujihandpy"]
+camera = ["pyrealsense2>=2.54"]
+
+[project.scripts]
+wuji = "wuji.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+wuji = ["resources/*.json", "resources/*.txt"]

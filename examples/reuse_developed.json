@@ -1,0 +1,11 @@
+{
+  "name": "reuse_developed_prepare",
+  "prompt": "先通过 develop 命令创建 local.prepare，再将它组合到新的抓取任务。",
+  "steps": [
+    {"op": "call", "skill": "local.prepare", "args": {"candidate": 0}},
+    {"op": "call", "skill": "grasp.approach"},
+    {"op": "call", "skill": "grasp.close"},
+    {"op": "call", "skill": "pick.raise", "args": {"height_m": 0.06}}
+  ],
+  "checks": [{"type": "lift_observed"}]
+}

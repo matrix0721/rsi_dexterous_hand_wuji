@@ -1,0 +1,7 @@
+{
+  "name": "repair_short_lift_mock",
+  "prompt": "离线修复示例：初始抬升太短，修复只补足抬升并用原阈值重新验证。",
+  "steps": [
+    {"op": "call", "skill": "task.pick_lift", "args": {"height_m": 0.01}}
+  ]
+}

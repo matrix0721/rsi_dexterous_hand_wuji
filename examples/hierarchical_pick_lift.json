@@ -1,0 +1,7 @@
+{
+  "name": "hierarchical_pick_lift",
+  "prompt": "从任务逐层展开到子技能，观察抬升并积累可复用子技能。",
+  "steps": [
+    {"op": "call", "skill": "task.pick_lift", "args": {"candidate": 0, "height_m": 0.06}}
+  ]
+}
