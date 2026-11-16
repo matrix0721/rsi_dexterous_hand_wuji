@@ -24,11 +24,11 @@ def save_preview(path, observation, plan, hand):
             "source": observation.source}
     html = '''<!doctype html><html lang="zh-CN"><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>v1-wuji · 抓取候选</title><style>
+<title>Wuji Imagine · 抓取候选</title><style>
 body{margin:0;background:#101b29;color:#dce6ef;font:16px system-ui}main{max-width:1100px;margin:auto;padding:28px}
 h1{font-size:26px}canvas{width:100%;height:560px;background:#152333;border-radius:12px;touch-action:none}
 select{padding:8px}p{line-height:1.7}pre{white-space:pre-wrap;color:#a9c0d7}</style>
-<main><h1>v1-wuji · 接触引导姿态搜索</h1>
+<main><h1>Wuji Imagine · 接触引导姿态搜索</h1>
 <p>拖动旋转，滚轮缩放。灰色：观测点云；蓝色：手部骨架采样；橙色：指腹；绿色：手掌根部；虚线：预抓取至抓取。</p>
 <label>候选 <select id="choice"></select></label><p id="meta"></p><canvas id="view"></canvas>
 <pre id="metrics"></pre><p>几何预览用于检查姿态，不代表真机碰撞检查或抓取成功。</p></main>

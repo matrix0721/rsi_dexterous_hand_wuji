@@ -1,71 +1,41 @@
-# 设计与参考项目的对应关系
+# 从 DexJoCo skill 到 Wuji 真机
 
-目标是提供可在 UR5e + Wuji 真机工作站逐步接入的独立实验项目，保持图像反馈和
-技能组合的设计，同时缩小仿真基准、过多约束与重复验证带来的工程负担。
+项目基于流程能力重新接线，未复制 DexJoCo 的 worker、动作维度或任务私有状态。
+所有底层硬件代码已包含在 `src/wujiimagine`，来源是同工作区 `v1-wuji`。
+包命名空间独立，安装时不会占用原 `wuji` 包。
 
-## 保留的设计
+目录组织遵循 `v1.1-dexjoco-imagine`：根级 `agent_skills`、`models`、`library`、
+`references` 配合平铺的 `src/wujiimagine` 功能模块。设备适配在 `native.py`，
+配方执行在 `execution.py`，机器人技能在 `robot_skills.py`；不嵌套原项目包结构。
+根级入口为 `run_imagine.py` / `run_imagine.ps1`，原配方能力通过 `recipe` 子命令调用。
 
-| 参考项目 | 继承的思想 | 本项目实现 |
+| 源项目能力 | 真机实现 | 证据与边界 |
 |---|---|---|
-| v1.3-dexjoco-image | RGB-D、候选抓取、接触分析、事后证据 | `perception.py`、`planner.py`、按观察记录的报告 |
-| v1.3-bench2dex-image | Wuji 手多阶段动作、抓取锚点、观察与技能记录 | `runtime.py` 中的 JSON 技能、抬升相对运动、收据导出 |
-| v1.3-handson-image | 几何估计、真实本体感觉、接触反馈 | PCA/法向、RTDE TCP、SDK 手部位置与负载反馈 |
+| agent-runtime | LiveSession、Context、localhost RPC、核心提示 | 一个进程拥有设备；外部模型 host 自行接入 |
+| learn-from-experts | 可选本地 references/index.json | 没有固定数量或仿真成功演示 |
+| rgbd-perception | RealSense/录制 NPZ/工厂插件、反投影 | 固定眼在手外；插件负责其他安装方式 |
+| world-modeling | ROI/聚类、法向、PCA、AABB、版本 | 可见表面；无自动分割/跨遮挡永久身份 |
+| numerical-grasp-planning | 实际手 FK 接触引导搜索 | 近似骨架与凸包，不保证完整路径/摩擦闭合 |
+| contact-planning | 抓取求解器 + 明确的短段目标 | 无通用工具角色编译器 |
+| imagination | 运动学假设 / 可选 MuJoCo 粒子接触预演 | 独立数据与模型，绝不接设备 |
+| robot-execution | UR RTDE / WujihandPy、动作前后记录 | 无 simulator reset，无自动命令重试 |
+| tool-state-estimation | 同特征的 RGB-D 到手掌局部坐标比较 | 控制器工作流，无自动追踪器 |
+| self-correction | 用户控制器的实测自由空间修正流程 | 不内置自主探测序列或修改标定 |
+| learn-and-repair | 对齐比较、局部残差、JSON 局部修复 | 不声称完整动力学辨识或实物泛化 |
+| controller-verification | 代码/运行时冻结、测量检查 | 无强制独立真机重放 |
+| experience-and-evaluation | memory 事件、明确证据范围 | 真实布局与人工干预需记录 |
+| data-collection | 稀疏 RGB-D / 动作 / 状态 / 失败前缀 | 无密集同步录制或 campaign coordinator |
+| benchmark-generation | 真实工作站任务规格流程 | 不自动生成物理场景 |
+| results-statistics | 按 report/events 的统计口径 | 不制造成功率、token 或零成本值 |
+| blender | 未迁入 | 可使用抓取 HTML 预览；无 Blender 时间线功能 |
 
-这是架构继承与独立实现，没有逐文件搬运父项目代码。三套项目的机器人类型、
-仿真接口、资产许可和任务判据不同，直接合并不能得到可用的真机控制器。
+预演绑定动作摘要、起始关节/TCP、序列号与世界版本。提供 prediction id 才执行对应性
+检查；普通实测执行无需预演。动作开始即推进序列，即使动作部分失败也不能重用旧预测。
+相机后处理失败保留完成前缀，不触发运动重试。比较必须发生在对应执行后且没有后续运动。
 
-## 模块
+MuJoCo 的物体代理来自可见 AABB，未见背面/凹槽/机器人外壳仍未知；质量、摩擦和
+参数离散只是显式假设。预测中没有官方任务成功函数。模型与合成 mock 不共享物理引擎，
+因此其残差可能很大，这是有意义的诊断，不是测试失败或真实动力学精度验证。
 
-```text
-cli.py         参数与资源生命周期
-camera.py      Frame、NPZ、RealSense、自定义相机入口
-perception.py  可见表面与位姿估计
-hand.py        精简官方运动学、指腹与碰撞近似
-planner.py     接触引导多起点搜索
-robot.py       Mock / UR RTDE + WujihandPy
-runtime.py     技能动作、锚点、日志和错误处理
-skills.py      层次展开、参数绑定、成功节点提取与子技能复用
-repair.py      失败诊断、局部修复与原目标验证闭环
-verification.py  节点后置条件、目标检查与报告审计
-preview.py     离线候选查看器
-tools/fit_camera.py  对应点刚体标定
-```
-
-依赖层级保持简单：基础运行只需 NumPy/SciPy；真机与相机是可选依赖。
-没有隐式 WSL 转发、父目录发现、预编译 GPU 核心或强制云服务。
-上传为独立仓库后，包内仍包含必要的手模型数据和许可。
-
-## 可调整的边界
-
-不保留受限 Python AST、禁止循环/赋值的 DSL、资产全量哈希门、benchmark 原生
-成功谓词、仿真真值毒化、克隆环境探针或全任务重放。真实机器人没有可供控制器
-读取的仿真物体位姿。相机输入和机器人状态直接决定实验，不需要额外模拟真值屏蔽。
-
-实际设备仍需要数值、关节范围、目标工作区、设备状态、力/负载与超时检查。
-这些检查集中在驱动和候选接口，不扩散为逐级证书或多轮验证。阈值集中可调。
-动作不静默钳成另一个位置，出界时明确记录错误，便于实验者修正参数。
-
-每次 `grasp` 重新观测并搜索，不直接复用旧世界坐标的候选。
-技能库记录实验收据，并能将成功节点发展为可调用的参数化子技能；不把离线演示、
-轨迹完成或视觉抬升自动晋级为实物成功。默认任务从 task 逐层展开为 skill、subskill
-和动作，失败定位保留完整路径。局部修复保留已完成前缀并检查原目标条件。
-需要模型自主规划时，模型只须生成同一 JSON 结构；调用服务的方式由实验者选择。
-具体协议见 [SKILLS_REPAIR_ZH.md](SKILLS_REPAIR_ZH.md)。
-
-## 当前能力边界
-
-| 能力 | 当前状态 |
-|---|---|
-| 独立离线 RGB-D → 候选 → 动作 → 报告 | 可运行，已做本机检查 |
-| 分层技能、局部修复与原条件复核 | 已做离线集成检查，真机默认不重试 |
-| 从成功节点提取子技能并再次调用 | 已做离线提取及实际复用检查 |
-| UR5e / Wuji Hand 1 右手适配器 | 已实现并对照官方 API，尚未接设备 |
-| RealSense 对齐深度与畸变反投影 | 已实现，尚未实机验证 |
-| 指腹、骨架与凸包代价 | 近似几何，需按实物软垫调整 |
-| 真实摩擦稳定性、完整外壳碰撞、机械臂避障 | 未实现证明/完整规划 |
-| 左手、Hand 2、双臂、眼在手上 | 扩展接口，未提供经过实机验证的配置 |
-| 插入、倒水、铰链等复杂任务 | 可扩展动作，本版未继承仿真成功声明 |
-
-后续优先由实际实验失败决定扩展：例如遮挡多就加入多视角，表面中心偏差大就接入
-CAD 配准，接触不稳定就接入触觉或更准确的外壳模型。避免先搭建庞大的测试和
-策略层，再寻找需要它们的实验。
+机器人 JSON 分层技能、项目流程 SKILL.md 和 Codex 安装 skill 分别管理。本次没有
+写入全局 Codex 技能目录或改变既有项目。源模型的许可证随包保留。

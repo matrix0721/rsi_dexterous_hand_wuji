@@ -1,53 +1,49 @@
-# 本次验证范围
+# 验证记录
 
-日期：2026-11-01。环境：Python 3.11.5、NumPy 1.26.4、SciPy 1.17.1。
-本文件记录软件检查，**不代表 UR5e、Wuji 或相机已完成实机验证**。
+## 目录结构调整
 
-## 已执行
+已按 `v1.1-dexjoco-imagine` 重排：根级 `agent_skills`、`models`、`library`、
+`references`，`src/wujiimagine` 按功能平铺；根级入口为 `run_imagine.py` 和
+`run_imagine.ps1`。硬件示例配置在 `models/hardware`，任务配方在 `library/tasks`。
+
+本次只复查结构调整影响的路径：已有 `checks/smoke.py` 通过，分层任务仍展开为
+6 个节点/13 步，`run_imagine.py recipe skills` 列出 6 项内置机器人技能。
+重建的 wheel 在隔离目录加载了 16 项流程 skill、20 个手关节及 6 项机器人技能，
+确认包内没有旧 `_robotics` 子包。新安装包为
+`output/wheel_structure/wuji_imagine-1.1.0-py3-none-any.whl`。
+旧构建和迁移残留归档至 `tmp`，原始实验记录未改写。本次未连接真机。
+
+## 初次实现的离线检查
+
+2026-11-14，在本工作区使用 Python 3.11.5、NumPy 1.26.4、SciPy 1.17.1
+完成以下相关离线检查。没有运行任务全集、连接机器人、修改本地标定或启动实物运动。
 
 | 检查 | 结果 |
 |---|---|
-| 十项离线检查 | 全部通过；包括四项新增的层次技能与修复集成检查 |
-| 合成 RGB-D 端到端演示 | 抓取指令、抬升、再次观测、报告完整执行 |
-| 默认姿态搜索 | 输出 4 个通过当前几何筛选的候选 |
-| 独立 wheel 构建 | 成功，包含手运动学与原 MIT 许可 |
-| Python 隔离模式从 wheel 直接运行 | 成功，不需要父项目源码或资产 |
-| 对应点标定工具 | 已用人工构造的刚体变换检查，残差约 1.4e-16 m |
-| 收据导出 | 记录 mock、来源和未验证标记 |
-| 分层展开 | 任务、技能、子技能共 6 个节点，展开为 13 个动作/检查步骤 |
-| 局部 repair-verification | 短抬升失败后仅补足高度并重拍，原目标条件保持不变 |
-| 过期帧局部修复 | 只重拍失败观察，不重复抓取和抬升 |
-| 子技能发展与再次调用 | 从失败前缀及修复成功片段提取 4 个叶子子技能，在新任务中实际复用 |
-| HTML 查看器 | JavaScript 语法通过，Chrome 无窗口渲染并检查页面 |
-| 发布内容检查 | 无本机项目绝对路径、设备密钥或未采用的算法品牌名称 |
+| `doctor` | 基础数值依赖与 MuJoCo 可用；RTDE/WujihandPy/RealSense 未安装；未连接硬件 |
+| `demo` 轻量预演 | mock 短段抬升、匹配执行和 fresh RGB-D 比较完成；静止假设残差 0 m |
+| `demo --engine mujoco` | 独立四粒子接触预演与比较完成；物体中心残差约 0.0476 m，如实保留 |
+| 分层 compile | hierarchical_pick_lift 展开为 6 个节点、13 步 |
+| 单次 mock 抓取配方 | pick_lift 完成；合成视觉抬升约 0.0598 m，相对 TCP 漂移约 0.000206 m |
+| `checks/smoke.py` | 16 项 skill 可读；动作修改/重复预测/插入运动后比较被拒绝；局部残差和运行时快照可用 |
+| localhost HTTP | 独立隐藏 mock 服务中 status/observe/execute/status 复用同一 session，序列 0→1，TCP 抬升 5 mm；结束后清理测试进程 |
+| 独立 wheel | 无网络、无依赖安装构建成功；临时目录隔离加载得到 16 项流程 skill、20 个手关节及 6 个内置机器人技能 |
 
-原六项检查包括：一次离线全流程与包内模型资源加载、运动异常后停止并记录部分执行、
-重复帧不能验证抬升、刚体标定恢复已知变换、力阈值触发后不发送运动、只读探测不
-构造控制接口或使能手。测试没有覆盖所有 SDK 调用组合，也没有跑 benchmark 全集。
+MuJoCo 代理与合成相机不是同一物理系统，约 4.8 cm 的残差不表示真机预测精度，
+也没有作为通过/成功标志。上述所有 `physical_success` 保持 `null`。
+mock 抬升来自合成夹持变量，仅验证数据与执行链路，不能据此声明实物抓取成功。
 
-新增四项覆盖层次参数和循环调用、局部修复后提取及实际复用、过期帧原地重观测、
-禁止放宽原目标或对不明真机抓取追加运动。完整离线检查在本机约 3 秒。
-技能检查通过仍按 mock/real 来源标记，没有把这些运行提升为实物抓取成功。
+本次检查修复了迁移后的机器人技能资源命名空间残留，并核对快照包含独立运行时。
+没有增加专家演示、世界验收证书、固定阶段数、仿真通过或多次真机重放前置条件。
 
-合成实验中命令抬升 0.060 m，图像估计抬升约 0.0598 m；这是人工构造深度图的
-软件集成结果。Mock 在抓取指令后假定目标随手移动，没有接触物理、摩擦或重力。
-因此 `physical_success` 为 null，来源始终是 `synthetic_fixture`。
+可审阅的工作区产物：
 
-## 尚待实际工作站完成
+- `output/smoke_kinematic/`：轻量闭环。
+- `output/smoke_mujoco/`：物理预演及实测比较。
+- `output/compiled_fixed/`：分层展开。
+- `output/recipe_smoke/`：单次 mock 抓取记录。
+- `output/wheel_final/wuji_imagine-1.1.0-py3-none-any.whl`：最终安装包。
 
-UR5e 远程控制与保护状态、Wuji USB/固件及关节映射、安装 TCP、负载、相机标定、
-RealSense 实时畸变/帧队列行为、进近和闭合扫掠、实物抓取与抬升稳定性尚未验证。
-骨架、凸包及观察位移不能替代全外壳/全机械臂碰撞检查或摩擦稳定性评价。
-
-## 复现
-
-```bash
-python -m pip install -e .
-python -m unittest discover -s tests -v
-python run_wuji.py demo --output outputs/demo
-python tools/fit_camera.py examples/camera_points.json
-python -m pip wheel . --no-deps --wheel-dir dist
-```
-
-常规修改只需运行相关检查。无需每次运行完整演示、重建 wheel、回放全部记录或
-安装真机依赖。真机设置见 [HARDWARE_ZH.md](docs/HARDWARE_ZH.md)。
+仍未验证：实际 SDK/固件兼容性、工作站 TCP 与相机标定、真实关节映射、
+完整机械臂/手壳扫掠碰撞、实物接触/滑移与任务完成。真机接入按
+[HARDWARE_ZH.md](docs/HARDWARE_ZH.md) 使用现场配置进行。

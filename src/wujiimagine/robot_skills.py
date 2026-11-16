@@ -1,7 +1,7 @@
 """Parameterized task -> skill -> subskill expansion and evidence-based reuse."""
 import copy
 import hashlib
-from importlib.resources import files
+from .common import PROJECT
 import json
 from pathlib import Path
 import re
@@ -50,7 +50,7 @@ def skill_tree(recipe, report=None):
 class SkillStore:
     def __init__(self, root="library/skills"):
         self.root = Path(root)
-        self.bundled = json.loads(files("wuji").joinpath("resources/skills.json").read_text(encoding="utf-8"))
+        self.bundled = json.loads((PROJECT / "library" / "skills.json").read_text(encoding="utf-8"))
 
     def get(self, skill_id):
         identifier(skill_id)

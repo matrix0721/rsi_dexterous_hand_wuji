@@ -18,15 +18,15 @@ task.pick_lift                       task：抓取并观察抬升
 
 ## 1. 先展开，再执行
 
-内置定义在 `src/wuji/resources/skills.json`，本地新增定义保存在
+内置定义在 `library/skills.json`，本地新增定义保存在
 `library/skills/<id>.json`，同 ID 的本地定义优先。定义包含 `id`、`level`、`version`、
 参数默认值、步骤和后置检查。`requires` 说明起始状态依赖；它不是静态证明，
 动作本身仍检查是否存在规划和抓取锚点。
 
 ```bash
-python run_wuji.py skills
-python run_wuji.py compile --task examples/hierarchical_pick_lift.json --output outputs/compiled
-python run_wuji.py demo --task examples/hierarchical_pick_lift.json --develop-subskills --output outputs/hierarchy
+python run_imagine.py recipe skills
+python run_imagine.py recipe compile --task library/tasks/hierarchical_pick_lift.json --output outputs/compiled
+python run_imagine.py recipe demo --task library/tasks/hierarchical_pick_lift.json --develop-subskills --output outputs/hierarchy
 ```
 
 `compile` 不连接设备，生成 `recipe.json`、`hierarchy.json` 和 `skill_tree.md`。
@@ -85,13 +85,13 @@ CLI 也支持 `--skill <id> --params '<JSON object>'`。复杂参数直接放入
 
 ```bash
 # 纯离线示例：初始仅抬升 0.01 m，第二次只补足高度和重拍
-python run_wuji.py demo --task examples/repair_short_lift.json --repair-attempts 1 --develop-subskills --output outputs/repair_demo
+python run_imagine.py recipe demo --task library/tasks/repair_short_lift.json --repair-attempts 1 --develop-subskills --output outputs/repair_demo
 
 # 只重新计算报告中的测量与目标收据，不连接相机或机器人
-python run_wuji.py verify --report outputs/repair_demo/report.json --output outputs/audit
+python run_imagine.py recipe verify --report outputs/repair_demo/report.json --output outputs/audit
 
 # 为已记录失败生成可审阅建议，不恢复旧机器人的状态
-python run_wuji.py repair --report outputs/repair_demo/attempt_01/report.json --output outputs/proposal
+python run_imagine.py recipe repair --report outputs/repair_demo/attempt_01/report.json --output outputs/proposal
 ```
 
 内置局部策略：
@@ -119,13 +119,13 @@ python run_wuji.py repair --report outputs/repair_demo/attempt_01/report.json --
 
 ```bash
 # 从已有实验提取全部成功叶节点，不执行机器人动作
-python run_wuji.py develop --report outputs/repair_demo/report.json
+python run_imagine.py recipe develop --report outputs/repair_demo/report.json
 
 # 将一个成功子技能保存为便于引用的名字
-python run_wuji.py develop --report outputs/repair_demo/report.json --node grasp.prepare --new-skill local.prepare
+python run_imagine.py recipe develop --report outputs/repair_demo/report.json --node grasp.prepare --new-skill local.prepare
 
 # 新任务调用它，再组合原有接近、闭合和抬升技能
-python run_wuji.py demo --task examples/reuse_developed.json --output outputs/reuse
+python run_imagine.py recipe demo --task library/tasks/reuse_developed.json --output outputs/reuse
 ```
 
 也可 `--node pick.acquire` 提取已完成的大节点，之后手工改写其步骤为更小的技能，

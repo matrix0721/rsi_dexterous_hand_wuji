@@ -1,0 +1,22 @@
+{
+  "version": "1.1-wuji-imagine",
+  "derived_from": "v1.1-dexjoco-imagine/agent_skills",
+  "skills": [
+    {"name":"agent-runtime","path":"agent-runtime/SKILL.md","autoload":true,"tools":["status","skills"]},
+    {"name":"learn-from-experts","path":"learn-from-experts/SKILL.md","autoload":false,"tools":["references","remember"]},
+    {"name":"rgbd-perception","path":"rgbd-perception/SKILL.md","autoload":false,"tools":["observe","pixel_to_world"]},
+    {"name":"world-modeling","path":"world-modeling/SKILL.md","autoload":false,"tools":["world","world_state"]},
+    {"name":"contact-planning","path":"contact-planning/SKILL.md","autoload":false,"tools":["plan_grasp","imagine"]},
+    {"name":"numerical-grasp-planning","path":"numerical-grasp-planning/SKILL.md","autoload":false,"tools":["plan_grasp"]},
+    {"name":"imagination","path":"imagination/SKILL.md","autoload":false,"tools":["imagine"]},
+    {"name":"robot-execution","path":"robot-execution/SKILL.md","autoload":true,"tools":["execute","operation","check"]},
+    {"name":"tool-state-estimation","path":"tool-state-estimation/SKILL.md","autoload":false,"tools":["observe","pixel_to_world","remember"]},
+    {"name":"self-correction","path":"self-correction/SKILL.md","autoload":false,"tools":["observe","execute","remember"]},
+    {"name":"learn-and-repair","path":"learn-and-repair/SKILL.md","autoload":false,"tools":["compare","learn_dynamics","remember"]},
+    {"name":"controller-verification","path":"controller-verification/SKILL.md","autoload":true,"tools":["freeze","status"]},
+    {"name":"experience-and-evaluation","path":"experience-and-evaluation/SKILL.md","autoload":false,"tools":["remember","status"]},
+    {"name":"data-collection","path":"data-collection/SKILL.md","autoload":false,"tools":["observe","execute","remember"]},
+    {"name":"benchmark-generation","path":"benchmark-generation/SKILL.md","autoload":false,"tools":["remember"]},
+    {"name":"results-statistics","path":"results-statistics/SKILL.md","autoload":false,"tools":["status"]}
+  ]
+}

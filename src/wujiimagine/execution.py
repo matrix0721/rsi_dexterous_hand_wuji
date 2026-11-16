@@ -8,9 +8,9 @@ import traceback
 import numpy as np
 
 from .perception import perceive
-from .planner import plan_grasps
-from .preview import save_preview
-from .skills import SkillStore
+from .grasp_planning import plan_grasps
+from .grasp_preview import save_preview
+from .robot_skills import SkillStore
 from .verification import CheckFailed, check_condition
 
 

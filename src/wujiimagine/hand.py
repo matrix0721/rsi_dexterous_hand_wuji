@@ -1,6 +1,6 @@
 """Small URDF-derived kinematic tree; SDK order is F1..F5, J1..J4."""
 import json
-from importlib.resources import files
+from .common import PROJECT
 import numpy as np
 from scipy.spatial.transform import Rotation
 
@@ -9,7 +9,7 @@ from .geometry import matrix, points_in, vector
 
 class HandModel:
     def __init__(self, path=None):
-        resource = files("wuji").joinpath("resources/wuji_hand1_right.json")
+        resource = PROJECT / "models" / "wuji_hand1_right.json"
         self.data = json.loads(resource.read_text(encoding="utf-8") if path is None
                                else __import__("pathlib").Path(path).read_text(encoding="utf-8"))
         self.joints = self.data["joints"]

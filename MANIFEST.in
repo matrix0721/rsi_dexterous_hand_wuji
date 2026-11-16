@@ -1,0 +1,5 @@
+recursive-include agent_skills *.json *.md
+recursive-include models *.json *.txt *.md
+recursive-include library *.json *.md
+recursive-include references *.json *.md
+global-exclude *.local.json

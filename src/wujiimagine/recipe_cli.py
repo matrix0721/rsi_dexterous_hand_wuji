@@ -8,11 +8,11 @@ from .camera import Frame, RealSenseCamera, ReplayCamera, SyntheticCamera
 from .config import load_config
 from .hand import HandModel
 from .perception import perceive
-from .planner import plan_grasps
-from .preview import save_preview
-from .robot import MockRobot, RealRobot, read_hardware
-from .runtime import write_json
-from .skills import SkillStore, skill_tree
+from .grasp_planning import plan_grasps
+from .grasp_preview import save_preview
+from .native import MockRobot, RealRobot, read_hardware
+from .execution import write_json
+from .robot_skills import SkillStore, skill_tree
 from .repair import run_experiment, saved_repair
 from .verification import audit_report
 
@@ -39,10 +39,10 @@ def make_camera(args, config, robot=None):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="v1-wuji: UR5e + Wuji RGB-D experiments")
+    parser = argparse.ArgumentParser(description="Wuji Imagine: UR5e + Wuji RGB-D recipes")
     parser.add_argument("command", choices=["demo", "capture", "plan", "run", "probe", "export",
                                              "skills", "compile", "develop", "repair", "verify"])
-    parser.add_argument("--config", help="JSON config; use configs/robot.local.json for hardware")
+    parser.add_argument("--config", help="JSON config; use models/hardware/robot.local.json for hardware")
     parser.add_argument("--backend", choices=["mock", "real"], default="mock")
     selection = parser.add_mutually_exclusive_group()
     selection.add_argument("--task", help="JSON recipe (flat or hierarchical)")

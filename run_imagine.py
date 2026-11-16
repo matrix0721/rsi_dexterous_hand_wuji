@@ -1,9 +1,8 @@
-"""Source-tree entry point; an editable installation is optional."""
 from pathlib import Path
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
-from wuji.cli import main
+from wujiimagine.cli import main
 
 if __name__ == "__main__":
     raise SystemExit(main())

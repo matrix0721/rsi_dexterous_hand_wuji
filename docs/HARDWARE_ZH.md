@@ -29,7 +29,7 @@ UR 上设置合适的负载和重心；配置 `payload_kg`、`payload_cog_m` 会
 python -m pip install -e ".[robot,camera]"
 ```
 
-复制 `configs/robot.example.json` 为 `configs/robot.local.json`，填写 UR 地址、
+复制 `models/hardware/robot.example.json` 为 `models/hardware/robot.local.json`，填写 UR 地址、
 Wuji 序列号、相机序列号、安装 TCP、负载、相机外参、桌面高度、ROI 和工作空间。
 本地配置已被 Git 忽略。无需把地址或序列号写进源码。
 
@@ -42,7 +42,7 @@ Wuji 的驱动权限、固件和 SDK 版本按 [官方 SDK 说明](https://githu
 先读状态：
 
 ```bash
-python run_wuji.py probe --backend real --config configs/robot.local.json
+python run_imagine.py recipe probe --backend real --config models/hardware/robot.local.json
 ```
 
 该命令只创建 RTDE receive 通道和手的读取对象。检查手的实际姿态、`handedness`
@@ -59,7 +59,7 @@ python run_wuji.py probe --backend real --config configs/robot.local.json
 `camera_points_m`、`base_points_m`。TCP 不等于标定探针尖端时先补偿探针偏移。
 
 ```bash
-python tools/fit_camera.py examples/camera_points.json --output outputs/camera_fit.json
+python tools/fit_camera.py tools/fixtures/camera_points.json --output outputs/camera_fit.json
 ```
 
 此处示例是人工构造点。真实使用时替换输入，将输出的 `T_base_camera` 写进
@@ -80,8 +80,8 @@ RealSense 将深度对齐至 RGB，读取实际深度比例；若彩色相机有
 ## 4. 候选检查和首个实验
 
 ```bash
-python run_wuji.py capture --backend real --config configs/robot.local.json --output captures/target
-python run_wuji.py plan --config configs/robot.local.json --frames captures/target/frame.npz --output outputs/target_plan
+python run_imagine.py recipe capture --backend real --config models/hardware/robot.local.json --output captures/target
+python run_imagine.py recipe plan --config models/hardware/robot.local.json --frames captures/target/frame.npz --output outputs/target_plan
 ```
 
 查看 `grasp_preview.html`，核对点云高度、目标位置、手的朝向及关节是否符合实物。
@@ -98,7 +98,7 @@ UR 的目标安全限制和 IK 只检查控制器对应的目标条件，不能�
 完成这些工作后，将本地配置 `hardware.calibrated` 改为 true：
 
 ```bash
-python run_wuji.py run --backend real --config configs/robot.local.json --task examples/pick_lift.json
+python run_imagine.py recipe run --backend real --config models/hardware/robot.local.json --task library/tasks/pick_lift.json
 ```
 
 默认速度 0.04 m/s、加速度 0.10 m/s²、短抬升 0.06 m，可按工作站修改。
